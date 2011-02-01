@@ -1,0 +1,5 @@
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFOperation\bin\Debug\MEFOperation.dll
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFOperation\bin\Debug\MEFOperation.pdb
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFOperation\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFOperation\obj\Debug\MEFOperation.dll
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFOperation\obj\Debug\MEFOperation.pdb
