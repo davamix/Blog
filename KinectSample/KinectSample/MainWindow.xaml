@@ -8,7 +8,11 @@
 				<Image x:Name="imgVideo" Width="640" Height="480" />
 				<StackPanel Width="100">
 					<GroupBox Header="Cámara" Margin="3">
-						<Button x:Name="btnPlay" Content="ON" Click="btnCameraPlay_Click" />
+						<StackPanel>
+							<Button x:Name="btnONOFF" Content="ON" Click="btnCameraONOFF_Click" />
+							<Button x:Name="btnCameraUp" Content="Up" Click="btnCameraUp_Click" />
+							<Button x:Name="btnCameraDown" Content="Down" Click="btnCameraDown_Click" />
+						</StackPanel>
 					</GroupBox>
 
 					<GroupBox Header="Repoducción" Margin="3">

@@ -30,9 +30,9 @@ namespace KinectSample
 
 		//Ruta del archivo donde se guardará el video.
 		private string _pathSaveData;
-		//TRUE si hay que guardar la información. Grabando.
+		//TRUE si está grabando el video.
 		private bool _recordData;
-		//Contiene toda la información que se está registrando.
+		//Contiene toda la información que se está grabando.
 		private Queue<byte[]> _dataQueue = new Queue<byte[]>();
 
 		private delegate void DelegateSaveData();
@@ -52,11 +52,9 @@ namespace KinectSample
 		{
 			_nuiRuntime = new Runtime();
 
-			try { _nuiRuntime.Initialize(RuntimeOptions.UseColor); } 
-			catch (InvalidOperationException) { return; }
+			try { _nuiRuntime.Initialize(RuntimeOptions.UseColor); } catch (InvalidOperationException) { return; }
 
-			try { _nuiRuntime.VideoStream.Open(ImageStreamType.Video, 2, ImageResolution.Resolution640x480, ImageType.Color); } 
-			catch (InvalidOperationException) { return; }
+			try { _nuiRuntime.VideoStream.Open(ImageStreamType.Video, 2, ImageResolution.Resolution640x480, ImageType.Color); } catch (InvalidOperationException) { return; }
 
 			_lastTime = DateTime.Now;
 
@@ -100,7 +98,7 @@ namespace KinectSample
 		{
 			//DelegateAdd myAdd = new DelegateAdd(AddEstado);
 			//Dispatcher.BeginInvoke(DispatcherPriority.Background, myAdd, String.Format("Información guardada: {0}", DateTime.Now));
-			
+
 			//Mensaje en el cuadro de estado
 			Dispatcher.BeginInvoke(
 				DispatcherPriority.Background,
@@ -118,7 +116,7 @@ namespace KinectSample
 					btnStartGrabar.IsEnabled = true;
 				},
 				null);
-			
+
 			//Habilita el botón de reproducir video
 			Dispatcher.BeginInvoke(
 				DispatcherPriority.Background,
@@ -136,7 +134,7 @@ namespace KinectSample
 		{
 			_nuiRuntime.VideoFrameReady -= OnVideoFrameReady;
 			_isCameraON = false;
-			btnPlay.Content = "ON";
+			btnONOFF.Content = "ON";
 			btnStartGrabar.IsEnabled = false;
 			btnStopGrabar.IsEnabled = false;
 		}
@@ -148,7 +146,7 @@ namespace KinectSample
 		{
 			_nuiRuntime.VideoFrameReady += new EventHandler<ImageFrameReadyEventArgs>(OnVideoFrameReady);
 			_isCameraON = true;
-			btnPlay.Content = "OFF";
+			btnONOFF.Content = "OFF";
 			btnStartGrabar.IsEnabled = true;
 			btnStopGrabar.IsEnabled = true;
 		}
@@ -188,7 +186,7 @@ namespace KinectSample
 		{
 			string retVal = string.Empty;
 			T myDlg = new T();
-			
+
 			myDlg.Filter = "Kinect Data (*.knt) | *.knt";
 
 			if (myDlg.ShowDialog().HasValue)
@@ -197,8 +195,9 @@ namespace KinectSample
 			return retVal;
 		}
 
+
 		#region "EVENTOS"
-		
+
 		private void OnVideoFrameReady(object sender, ImageFrameReadyEventArgs e)
 		{
 			PlanarImage myImage = e.ImageFrame.Image;
@@ -213,9 +212,9 @@ namespace KinectSample
 		//y activar el proceso de grabación del video.
 		private void btnStartGrabar_Click(object sender, RoutedEventArgs e)
 		{
-			string myFile = ShowDialog<Microsoft.Win32.SaveFileDialog>();
-			
-			if (!String.IsNullOrEmpty(myFile)) {
+			_pathSaveData = ShowDialog<Microsoft.Win32.SaveFileDialog>();
+
+			if (!String.IsNullOrEmpty(_pathSaveData)) {
 				_recordData = true;
 				btnStartGrabar.IsEnabled = false;
 				btnReproducir.IsEnabled = false;
@@ -230,12 +229,12 @@ namespace KinectSample
 			_recordData = false;
 
 			ShowEstado(String.Format("Stop grabación : {0}", DateTime.Now));
-			
+
 			SaveData();
 		}
 
 		//Des/habilita la reproducción de la imágen.
-		private void btnCameraPlay_Click(object sender, RoutedEventArgs e)
+		private void btnCameraONOFF_Click(object sender, RoutedEventArgs e)
 		{
 			if (_isCameraON) {
 				StopCamara();
@@ -257,14 +256,28 @@ namespace KinectSample
 				if (!String.IsNullOrEmpty(myFile)) {
 					_isPlayingVideo = true;
 					StopCamara();
-					
+
 					//Esto tiene que ir en un hilo a parte
 					StartVideo(myFile);
 				}
 			}
 		}
 
+		//Sube el ángulo de visión de la cámara
+		private void btnCameraUp_Click(object sender, RoutedEventArgs e)
+		{
+			_nuiRuntime.NuiCamera.ElevationAngle += 5;
+		}
+
+		//Baja el ángulo de visión de la cámara
+		private void btnCameraDown_Click(object sender, RoutedEventArgs e)
+		{
+			_nuiRuntime.NuiCamera.ElevationAngle -= 5;
+		}
+
 		#endregion
+
+
 
 	}
 }
