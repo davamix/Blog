@@ -36,7 +36,7 @@ namespace KinectSample
 		private Queue<byte[]> _dataQueue = new Queue<byte[]>();
 
 		private delegate void DelegateSaveData();
-		//private delegate void DelegateAdd(string value);
+		private delegate void DelegatePlayVideo(string value);
 
 		public MainWindow()
 		{
@@ -157,7 +157,22 @@ namespace KinectSample
 		/// <param name="fileName">Arhivo de video</param>
 		private void StartVideo(string fileName)
 		{
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
+			Dispatcher.BeginInvoke(DispatcherPriority.Background, (System.Threading.SendOrPostCallback)delegate
+			{
+				using (StreamReader sr = new StreamReader(fileName)) {
+					while (!sr.EndOfStream) {
+						byte[] line = System.Text.Encoding.UTF8.GetBytes(sr.ReadLine());
+						MemoryStream ms = new MemoryStream(line);
+
+						BitmapImage bi = new BitmapImage();
+						bi.StreamSource = ms;
+
+						imgVideo.Source = bi;
+					}
+
+				}
+			}, null);
 		}
 
 		/// <summary>
@@ -258,7 +273,9 @@ namespace KinectSample
 					StopCamara();
 
 					//Esto tiene que ir en un hilo a parte
-					StartVideo(myFile);
+					DelegatePlayVideo myDelegate = new DelegatePlayVideo(StartVideo);
+					//myDelegate.Invoke(myFile);
+					IAsyncResult result = myDelegate.BeginInvoke(myFile, null, null);
 				}
 			}
 		}
