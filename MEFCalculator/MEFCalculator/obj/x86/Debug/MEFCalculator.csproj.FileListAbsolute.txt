@@ -1,0 +1,7 @@
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\bin\Debug\MEFCalculator.exe
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\bin\Debug\MEFCalculator.pdb
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\bin\Debug\MEFOperation.dll
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\bin\Debug\MEFOperation.pdb
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\obj\x86\Debug\MEFCalculator.exe
+C:\Users\davamix\Desarrollo\Blog\Codigo\MEFCalculator\MEFCalculator\obj\x86\Debug\MEFCalculator.pdb

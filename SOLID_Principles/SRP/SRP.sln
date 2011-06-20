@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calculator.cs", "Calculator.cs\Calculator.cs.csproj", "{5EE388DE-640A-4FF6-9458-0AC1C7742E02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorTest", "CalculatorTest\CalculatorTest.csproj", "{FF5139F7-F941-41FC-B4F5-D1EFB834530A}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://portatil7:8080/tfs/blogsamples
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Calculator.cs\\Calculator.cs.csproj
+		SccProjectName1 = Calculator.cs
+		SccLocalPath1 = Calculator.cs
+		SccProjectUniqueName2 = CalculatorTest\\CalculatorTest.csproj
+		SccProjectName2 = CalculatorTest
+		SccLocalPath2 = CalculatorTest
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EE388DE-640A-4FF6-9458-0AC1C7742E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EE388DE-640A-4FF6-9458-0AC1C7742E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EE388DE-640A-4FF6-9458-0AC1C7742E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EE388DE-640A-4FF6-9458-0AC1C7742E02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF5139F7-F941-41FC-B4F5-D1EFB834530A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF5139F7-F941-41FC-B4F5-D1EFB834530A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF5139F7-F941-41FC-B4F5-D1EFB834530A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF5139F7-F941-41FC-B4F5-D1EFB834530A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
