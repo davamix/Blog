@@ -17,6 +17,8 @@ using System.Windows.Threading;
 namespace KinectSample
 {
 	using Microsoft.Research.Kinect.Nui;
+	using System.Runtime.Serialization;
+	using System.Runtime.Serialization.Formatters.Binary;
 
 	/// <summary>
 	/// Lógica de interacción para MainWindow.xaml
@@ -33,10 +35,10 @@ namespace KinectSample
 		//TRUE si está grabando el video.
 		private bool _recordData;
 		//Contiene toda la información que se está grabando.
-		private Queue<byte[]> _dataQueue = new Queue<byte[]>();
+		private Queue<PlanarImageSerializable> _imageQueue = new Queue<PlanarImageSerializable>();
 
-		private delegate void DelegateSaveData();
-		private delegate void DelegatePlayVideo(string value);
+		private delegate void SaveDataDelegate();
+		private delegate void PlayVideoDelegate(string value);
 
 		public MainWindow()
 		{
@@ -68,7 +70,7 @@ namespace KinectSample
 		{
 			ShowEstado(String.Format("Guardando información : {0}", DateTime.Now));
 
-			DelegateSaveData myDelegate = new DelegateSaveData(BeginSaveData);
+			SaveDataDelegate myDelegate = new SaveDataDelegate(BeginSaveData);
 			IAsyncResult result = myDelegate.BeginInvoke(EndSaveData, null);
 		}
 
@@ -77,16 +79,16 @@ namespace KinectSample
 		/// </summary>
 		private void BeginSaveData()
 		{
-			try {
-				using (StreamWriter sw = new StreamWriter(_pathSaveData)) {
-					foreach (byte[] item in _dataQueue) {
-						sw.WriteLine(Encoding.UTF8.GetString(item));
-					}
-				}
-			} catch (Exception) {
-				throw;
-			}
+			FileStream fs = new FileStream(_pathSaveData, FileMode.OpenOrCreate);
+			BinaryFormatter myFormatter = new BinaryFormatter();
 
+			try {
+				myFormatter.Serialize(fs, _imageQueue);
+			} catch (SerializationException ex) {
+				throw;
+			} finally {
+				fs.Close();
+			}
 		}
 
 		/// <summary>
@@ -96,9 +98,6 @@ namespace KinectSample
 		/// <param name="result"></param>
 		private void EndSaveData(IAsyncResult result)
 		{
-			//DelegateAdd myAdd = new DelegateAdd(AddEstado);
-			//Dispatcher.BeginInvoke(DispatcherPriority.Background, myAdd, String.Format("Información guardada: {0}", DateTime.Now));
-
 			//Mensaje en el cuadro de estado
 			Dispatcher.BeginInvoke(
 				DispatcherPriority.Background,
@@ -140,7 +139,7 @@ namespace KinectSample
 		}
 
 		/// <summary>
-		/// Iniciar la reproducción de la cámara
+		/// Inicia la reproducción de la cámara
 		/// </summary>
 		private void StartCamara()
 		{
@@ -157,26 +156,47 @@ namespace KinectSample
 		/// <param name="fileName">Arhivo de video</param>
 		private void StartVideo(string fileName)
 		{
-			//throw new NotImplementedException();
-			Dispatcher.BeginInvoke(DispatcherPriority.Background, (System.Threading.SendOrPostCallback)delegate
-			{
-				using (StreamReader sr = new StreamReader(fileName)) {
-					while (!sr.EndOfStream) {
-						byte[] line = System.Text.Encoding.UTF8.GetBytes(sr.ReadLine());
-						MemoryStream ms = new MemoryStream(line);
+			Queue<PlanarImageSerializable> myImages = DeserializeVideoData(fileName);
 
-						BitmapImage bi = new BitmapImage();
-						bi.StreamSource = ms;
+			while (myImages.Count > 0) {
+				PlanarImageSerializable pi = myImages.Dequeue();
+				Dispatcher.BeginInvoke(DispatcherPriority.Background, (System.Threading.SendOrPostCallback)delegate
+				{
+					imgVideo.Source = BitmapSource.Create(pi.Width, pi.Height, 96, 96, PixelFormats.Bgr32, null, pi.Bits, pi.Width * pi.BytesPerPixel);
+					//Con la parada cada 33 ms simula los 30 frames por segundo de la grabación original
+					System.Threading.Thread.Sleep(33);
+				},null);
+			}
 
-						imgVideo.Source = bi;
-					}
-
-				}
-			}, null);
+			//Ha finalizado la reproducción del video.
+			_isPlayingVideo = false;
 		}
 
 		/// <summary>
-		/// Para la reproducción del video
+		/// Deserializa el archivo que contiene los datos de la grabación
+		/// </summary>
+		/// <param name="fileData">Ruta del arhivo</param>
+		/// <returns>Cola con los datos de las imágenes grabadas.</returns>
+		private Queue<PlanarImageSerializable> DeserializeVideoData(string fileData)
+		{
+			Queue<PlanarImageSerializable> retVal;
+			FileStream fs = new FileStream(fileData, FileMode.Open);
+
+			try {
+				BinaryFormatter myFormatter = new BinaryFormatter();
+				retVal = (Queue<PlanarImageSerializable>)myFormatter.Deserialize(fs);
+			} catch (Exception) {
+
+				throw;
+			} finally {
+				fs.Close();
+			}
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Para la reproducción del video grabado
 		/// </summary>
 		private void StopVideo()
 		{
@@ -215,10 +235,15 @@ namespace KinectSample
 
 		private void OnVideoFrameReady(object sender, ImageFrameReadyEventArgs e)
 		{
-			PlanarImage myImage = e.ImageFrame.Image;
+			PlanarImageSerializable myImage = new PlanarImageSerializable() {
+				Bits = e.ImageFrame.Image.Bits,
+				Width = e.ImageFrame.Image.Width,
+				Height = e.ImageFrame.Image.Height,
+				BytesPerPixel = e.ImageFrame.Image.BytesPerPixel
+			};
 
 			if (_recordData)
-				_dataQueue.Enqueue(myImage.Bits);
+				_imageQueue.Enqueue(myImage);
 
 			imgVideo.Source = BitmapSource.Create(myImage.Width, myImage.Height, 96, 96, PixelFormats.Bgr32, null, myImage.Bits, myImage.Width * myImage.BytesPerPixel);
 		}
@@ -234,7 +259,8 @@ namespace KinectSample
 				btnStartGrabar.IsEnabled = false;
 				btnReproducir.IsEnabled = false;
 
-				ShowEstado(String.Format("Iniciando grabación : {0}", DateTime.Now));
+				ShowEstado(String.Format("Guardando en: {0}", _pathSaveData));
+				ShowEstado(String.Format("Iniciando grabación: {0}", DateTime.Now));
 			}
 		}
 
@@ -272,9 +298,7 @@ namespace KinectSample
 					_isPlayingVideo = true;
 					StopCamara();
 
-					//Esto tiene que ir en un hilo a parte
-					DelegatePlayVideo myDelegate = new DelegatePlayVideo(StartVideo);
-					//myDelegate.Invoke(myFile);
+					PlayVideoDelegate myDelegate = new PlayVideoDelegate(StartVideo);
 					IAsyncResult result = myDelegate.BeginInvoke(myFile, null, null);
 				}
 			}
