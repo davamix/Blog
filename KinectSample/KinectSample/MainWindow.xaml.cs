@@ -79,16 +79,43 @@ namespace KinectSample
 		/// </summary>
 		private void BeginSaveData()
 		{
-			FileStream fs = new FileStream(_pathSaveData, FileMode.OpenOrCreate);
+			MemoryStream ms = new MemoryStream();
 			BinaryFormatter myFormatter = new BinaryFormatter();
 
 			try {
-				myFormatter.Serialize(fs, _imageQueue);
+				myFormatter.Serialize(ms, _imageQueue);
+				CompressData(ms, _pathSaveData);
 			} catch (SerializationException ex) {
 				throw;
 			} finally {
-				fs.Close();
+				//sw.Close();
 			}
+		}
+
+		private void CompressData(Stream stream, string savePath)
+		{
+			using (FileStream fs = File.Create(savePath)) {
+				using (System.IO.Compression.GZipStream gz = new System.IO.Compression.GZipStream(fs, System.IO.Compression.CompressionMode.Compress)) {
+					stream.Seek(0, SeekOrigin.Begin);
+					stream.CopyTo(gz);
+				}
+			}
+		}
+
+		/*
+		 * OutOfMemory cuando el archivo es muy grande.
+		 */
+		private Stream DecompressData(string pathData)
+		{
+			Stream retVal = new MemoryStream();
+
+			using (FileStream fsIn = new FileStream(pathData, FileMode.Open)) {
+				using (System.IO.Compression.GZipStream gz = new System.IO.Compression.GZipStream(fsIn, System.IO.Compression.CompressionMode.Decompress)) {
+					gz.CopyTo(retVal);
+				}
+			}
+
+			return retVal;
 		}
 
 		/// <summary>
@@ -156,7 +183,8 @@ namespace KinectSample
 		/// <param name="fileName">Arhivo de video</param>
 		private void StartVideo(string fileName)
 		{
-			Queue<PlanarImageSerializable> myImages = DeserializeVideoData(fileName);
+			Stream myStream = DecompressData(fileName);
+			Queue<PlanarImageSerializable> myImages = DeserializeVideoData(myStream);
 
 			while (myImages.Count > 0) {
 				PlanarImageSerializable pi = myImages.Dequeue();
@@ -177,19 +205,20 @@ namespace KinectSample
 		/// </summary>
 		/// <param name="fileData">Ruta del arhivo</param>
 		/// <returns>Cola con los datos de las imágenes grabadas.</returns>
-		private Queue<PlanarImageSerializable> DeserializeVideoData(string fileData)
+		private Queue<PlanarImageSerializable> DeserializeVideoData(Stream streamData)
 		{
 			Queue<PlanarImageSerializable> retVal;
-			FileStream fs = new FileStream(fileData, FileMode.Open);
+			//FileStream fs = new FileStream(fileData, FileMode.Open);
 
 			try {
 				BinaryFormatter myFormatter = new BinaryFormatter();
-				retVal = (Queue<PlanarImageSerializable>)myFormatter.Deserialize(fs);
+				streamData.Seek(0, SeekOrigin.Begin);
+				retVal = (Queue<PlanarImageSerializable>)myFormatter.Deserialize(streamData);
 			} catch (Exception) {
 
 				throw;
 			} finally {
-				fs.Close();
+				//fs.Close();
 			}
 
 			return retVal;
